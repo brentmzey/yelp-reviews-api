@@ -15,9 +15,7 @@
 	<description>Demo project for Spring Boot</description>
 
 	<properties>
-		<java.version>15</java.version>
-		<!-- <spring.cloud.gcp.project-id>java-yelp-user-avatar-emotion</spring.cloud.gcp.project-id>
-		<spring.cloud.gcp.credentials.location>C:\\Users\\brent\\Documents\\apiendpoint\\google_api_key_file.json</spring.cloud.gcp.credentials.location> -->
+		<java.version>14</java.version>
 	</properties>
 
 	<dependencyManagement>
