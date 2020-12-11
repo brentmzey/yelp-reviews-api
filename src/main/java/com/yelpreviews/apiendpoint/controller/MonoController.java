@@ -24,17 +24,17 @@ public class MonoController {
     private static String API_KEY;
 
     static {
-        API_KEY = System.getenv("YELP_API_KEY");
-        // try {
-            // if(System.getenv("USERNAME").equalsIgnoreCase("brent")) {
-                // DotEnvFileToSysProps.setCredentialsAsSystemProperties();
-                // API_KEY = System.getProperty("YELP_API_KEY");
-            // }
-        // } catch (IncorrectDotEnvFileFormat e) {
-        //     System.out.println(e.getMessage());
-        //     System.out.println("Could not get proper Yelp API Key credentials. Program closing.");
-        //     System.exit(0);
-        // }
+        // API_KEY = System.getenv("YELP_API_KEY");
+        try {
+            if(System.getenv("USERNAME").equalsIgnoreCase("brent")) {
+                DotEnvFileToSysProps.setCredentialsAsSystemProperties();
+                API_KEY = System.getProperty("YELP_API_KEY");
+            }
+        } catch (IncorrectDotEnvFileFormat e) {
+            System.out.println(e.getMessage());
+            System.out.println("Could not get proper Yelp API Key credentials. Program closing.");
+            System.exit(0);
+        }
     }
 
     /**
