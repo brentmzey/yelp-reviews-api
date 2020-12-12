@@ -80,8 +80,8 @@ public class YelpReview {
     public short getRating() { return this.rating; }
     @JsonGetter("review")
     public String getReview() { return this.review; };
-    @JsonGetter("userAvatarEmotion")
-    public ModelAndView getuserAvatarEmotion() { return this.userAvatarEmotion; }
+    // @JsonGetter("userAvatarEmotion")
+    // public ModelAndView getuserAvatarEmotion() { return this.userAvatarEmotion; }
     
     @JsonSetter("user")
     public void setUserMap(Map<String, String> userMap) {
