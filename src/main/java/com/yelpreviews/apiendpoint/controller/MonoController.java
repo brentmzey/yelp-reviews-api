@@ -57,8 +57,7 @@ public class MonoController {
                 .header("Authorization", "Bearer " + API_KEY)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .bodyToMono(String.class)
-                .log();
+                .bodyToMono(String.class);
         String bizSearchJson = bizSearchMono.block();
         String bizId = JSON.jsonToObject(JSON.parseJsonString(bizSearchJson), YelpBizSearch.class).getBizId();
         // Now call for reviews from the top business resulting from the our business search above
@@ -68,8 +67,7 @@ public class MonoController {
                 .header("Authorization", "Bearer " + API_KEY)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .bodyToMono(String.class)
-                .log();
+                .bodyToMono(String.class);
         String reviewsSearchJson = reviewsSearchMono.block();
         ApiResponse apiResponse = new ApiResponse(JSON.parseJsonString(reviewsSearchJson).get("reviews"), 
         JSON.parseJsonString(bizSearchJson));
@@ -85,8 +83,7 @@ public class MonoController {
                 .header("Authorization", "Bearer " + API_KEY)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .bodyToMono(String.class)
-                .log();
+                .bodyToMono(String.class);
         // List<String> bizSingletonSearchList = new ArrayList<>();
         // bizSingletonSearchList.add(bizSearchMono.block());
         // String bizSearchJson = JSON.objectMapper.writeValueAsString(bizSingletonSearchList);
@@ -102,8 +99,7 @@ public class MonoController {
                 .header("Authorization", "Bearer " + API_KEY)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .bodyToMono(String.class)
-                .log();
+                .bodyToMono(String.class);
         String reviewsSearchJson = reviewsSearchMono.block();
         ApiResponse apiResponse = new ApiResponse(JSON.parseJsonString(reviewsSearchJson).get("reviews"), 
         JSON.parseJsonString(bizSearchJson));
