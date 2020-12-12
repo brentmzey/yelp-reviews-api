@@ -1,6 +1,7 @@
 package com.yelpreviews.apiendpoint.apis;
 
 import java.util.Map;
+import java.util.Properties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -26,8 +27,9 @@ public class YelpApi {
     private boolean isBizDetailsSingleton = false;
 
     {
-        if (System.getProperty("process.env") == "prod") {
-        API_KEY = System.getenv().get("YELP_API_KEY");
+        Properties systemProps = System.getProperties();
+        if (systemProps.getProperty("process.env") == "prod") {
+            API_KEY = System.getenv().get("YELP_API_KEY");
         } else {
             try {
                 if(System.getenv().get("USERNAME").equalsIgnoreCase("brent")) {
