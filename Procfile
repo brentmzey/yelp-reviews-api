@@ -1,1 +1,1 @@
-java -Dserver.port=$8080 $JAVA_OPTS -jar target/ApiendpointApplication-0.0.1-SNAPSHOT.jar
+web: java -jar target/apiendpoint-0.0.1-SNAPSHOT.jar -Dserver.port=8080
