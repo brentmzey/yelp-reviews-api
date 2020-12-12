@@ -96,7 +96,7 @@
 	</dependencies>
 
 	<build>
-		<pluginManagement>
+		<!-- <pluginManagement>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -113,18 +113,18 @@
 				</executions>
 			</plugin>
 		</plugins>
-		</pluginManagement>
-		<!-- <plugins>
+		</pluginManagement> -->
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
 			<plugin>
 				<groupId>com.heroku.sdk</groupId>
 				<artifactId>heroku-maven-plugin</artifactId>
 				<version>3.6.2</version>
 			</plugin>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-		</plugins> -->
+		</plugins>
 	</build>
 
 </project>
