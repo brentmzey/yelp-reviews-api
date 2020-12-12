@@ -24,7 +24,7 @@ public class MonoController {
     private static String API_KEY;
 
     static {
-        API_KEY = System.getenv("YELP_API_KEY");
+        API_KEY = System.getenv().get("YELP_API_KEY");
         // try {
         //     if(System.getenv("USERNAME").equalsIgnoreCase("brent")) {
         //         DotEnvFileToSysProps.setCredentialsAsSystemProperties();
