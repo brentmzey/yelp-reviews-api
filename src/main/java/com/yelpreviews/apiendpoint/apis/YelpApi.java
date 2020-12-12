@@ -26,7 +26,7 @@ public class YelpApi {
     private boolean isBizDetailsSingleton = false;
 
     {
-        if (System.getProperty("process.env") != null & System.getProperty("process.env") == "prod") {
+        if (System.getenv().get("process.env") == "prod") {
             API_KEY = System.getenv().get("YELP_API_KEY");
         } else {
             try {
