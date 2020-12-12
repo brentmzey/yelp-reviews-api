@@ -1,1 +1,1 @@
-web: java -jar target/apiendpoint-0.0.1-SNAPSHOT.jar -Dserver.port=8080
+web: java -jar target/classes:target/apiendpoint-0.0.1-SNAPSHOT.jar -Dserver.port=$PORT

@@ -46,6 +46,8 @@ class ApiendpointApplicationTests {
 
 		System.out.println(JSON.objectMapper.writeValueAsString(reviews));
 
+		assertEquals("[{\"rating\":5,\"review\":\"Went back again to this place since the last time i visited the bay area 5 months ago, and nothing has changed. Still the sketchy Mission, Still the cashier...\",\"userName\":\"Ella A.\",\"userAvatarUrl\":\"https://s3-media3.fl.yelpcdn.com/photo/iwoAD12zkONZxJ94ChAaMg/o.jpg\"},{\"rating\":4,\"review\":\"The \\\"restaurant\\\" is inside a small deli so there is no sit down area. Just grab and go.\\n\\nInside, they sell individually packaged ingredients so that you can...\",\"userName\":\"Yanni L.\",\"userAvatarUrl\":null},{\"rating\":4,\"review\":\"Dear Mission District,\\n\\nI miss you and your many delicious late night food establishments and vibrant atmosphere.  I miss the way you sound and smell on a...\",\"userName\":\"Suavecito M.\",\"userAvatarUrl\":null}]", JSON.objectMapper.writeValueAsString(reviews));
+
 	}
 	
 	@Test
@@ -57,6 +59,8 @@ class ApiendpointApplicationTests {
 		ApiResponse apiResponse = new ApiResponse(rootReviewsNode, rootBizNode);
 
 		System.out.println(JSON.objectToJsonString(apiResponse, ApiResponse.class));
+	
+		assertEquals("{\"businessName\":\"Four Barrel Coffee\",\"businessId\":\"E8RJkjfdcwgtyoPMjQ_Olg\",\"city\":\"San Francisco\",\"reviews\":[{\"rating\":5,\"review\":\"Went back again to this place since the last time i visited the bay area 5 months ago, and nothing has changed. Still the sketchy Mission, Still the cashier...\",\"userName\":\"Ella A.\",\"userAvatarUrl\":\"https://s3-media3.fl.yelpcdn.com/photo/iwoAD12zkONZxJ94ChAaMg/o.jpg\"},{\"rating\":4,\"review\":\"The \\\"restaurant\\\" is inside a small deli so there is no sit down area. Just grab and go.\\n\\nInside, they sell individually packaged ingredients so that you can...\",\"userName\":\"Yanni L.\",\"userAvatarUrl\":null},{\"rating\":4,\"review\":\"Dear Mission District,\\n\\nI miss you and your many delicious late night food establishments and vibrant atmosphere.  I miss the way you sound and smell on a...\",\"userName\":\"Suavecito M.\",\"userAvatarUrl\":null}]}", JSON.objectToJsonString(apiResponse, ApiResponse.class));
 	}
 
 }
