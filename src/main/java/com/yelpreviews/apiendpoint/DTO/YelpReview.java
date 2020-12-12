@@ -18,11 +18,11 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 // import com.google.cloud.vision.v1.ImageAnnotatorSettings;
 // import com.google.cloud.vision.v1.Feature.Type;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.gcp.vision.CloudVisionTemplate;
-import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.ResourceLoader;
-import org.springframework.web.servlet.ModelAndView;
+// import org.springframework.beans.factory.annotation.Autowired;
+// import org.springframework.cloud.gcp.vision.CloudVisionTemplate;
+// import org.springframework.core.io.DefaultResourceLoader;
+// import org.springframework.core.io.ResourceLoader;
+// import org.springframework.web.servlet.ModelAndView;
 
 @JsonPropertyOrder({ "rating", "review", "userName", "userAvatarUrl" })
 @JsonIgnoreProperties({ "userMap" })
@@ -31,7 +31,7 @@ public class YelpReview {
     private String userAvatarUrl;
     private short rating;
     private String review;
-    private ModelAndView userAvatarEmotion;
+    // private ModelAndView userAvatarEmotion;
     @JsonIgnore
     private Map<String, String> userMap;
     // @JsonIgnore
