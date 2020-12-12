@@ -1,1 +1,1 @@
-web: java -jar target/apiendpoint-0.0.1-SNAPSHOT.jar -Dserver.port=$PORT
+web: java -jar target/apiendpoint-0.0.1-SNAPSHOT.jar -Dserver.port=$PORT -Dprocess.env=prod

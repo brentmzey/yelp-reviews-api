@@ -18,7 +18,6 @@ public class ApiResponse {
     private String businessId;
     private String city;
 
-
     public ApiResponse(JsonNode reviewArrayNode, JsonNode bizSearchNode) throws JsonMappingException, JsonProcessingException, IllegalArgumentException {
         Iterator<Map<String, ?>> reviewListIter = (Iterator<Map<String, ?>>)JSON.jsonToObject(reviewArrayNode, ArrayList.class).iterator();
         while(reviewListIter.hasNext())
@@ -28,6 +27,10 @@ public class ApiResponse {
         this.businessName = yelpBizSearch.getBizName();
         this.businessId = yelpBizSearch.getBizId();
         this.city = yelpBizSearch.getBizCity();
+    }
+
+    public String toJson() throws JsonProcessingException {
+        return JSON.objectToJsonString(this, this.getClass());
     }
 
     /**

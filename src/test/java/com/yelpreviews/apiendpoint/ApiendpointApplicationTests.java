@@ -17,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class ApiendpointApplicationTests {
 
+	// ADD WEBTEST CLIENT tests to bind actions that simulate Client operations on the service
 	// @Test
 	// void testYelpApiEndpointAuthorization() {
 	// 	WebClient yelpReviews = WebClient.create("https://localhost:8080");
