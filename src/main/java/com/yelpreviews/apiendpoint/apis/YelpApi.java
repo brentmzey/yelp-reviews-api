@@ -27,21 +27,21 @@ public class YelpApi {
     private boolean isBizDetailsSingleton = false;
 
     {
-        Properties systemProps = System.getProperties();
-        if (systemProps.getProperty("process.env") == "prod") {
+        // Properties systemProps = System.getProperties();
+        // if (systemProps.getProperty("process.env") == "prod") {
             API_KEY = System.getenv().get("YELP_API_KEY");
-        } else {
-            try {
-                if(System.getenv().get("USERNAME").equalsIgnoreCase("brent")) {
-                    DotEnvFileToSysProps.setCredentialsAsSystemProperties();
-                    API_KEY = System.getProperty("YELP_API_KEY");
-                }
-            } catch (IncorrectDotEnvFileFormat e) {
-                System.out.println(e.getMessage());
-                System.out.println("Could not get proper Yelp API Key credentials. Program closing.");
-                System.exit(0);
-            }
-        }
+        // } else {
+            // try {
+                // if(System.getenv().get("USERNAME").equalsIgnoreCase("brent")) {
+                    // DotEnvFileToSysProps.setCredentialsAsSystemProperties();
+                    // API_KEY = System.getProperty("YELP_API_KEY");
+                // }
+            // } catch (IncorrectDotEnvFileFormat e) {
+                // System.out.println(e.getMessage());
+                // System.out.println("Could not get proper Yelp API Key credentials. Program closing.");
+                // System.exit(0);
+            // }
+        // }
     }
     
     public YelpApi(PathBuilder reviewsSearchUriBuilder, PathBuilder bizSearchUriBuilder, HttpMethod httpMethod, Map<String,String> uriVars, boolean isBizSearchCallFirst) throws JsonMappingException, JsonProcessingException, IllegalArgumentException {
