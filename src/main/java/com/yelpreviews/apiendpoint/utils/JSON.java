@@ -16,7 +16,7 @@ public class JSON {
     /**
      * 
      * @param jsonString
-     * @return the root <JsonNode> of the whole object representation. Then can further traverse the JSON off the return value of this method.
+     * @return the root node of the JSON string object representation. Then can further traverse the JSON off the return value of this method.
      * @throws JsonProcessingException
      * @throws JsonMappingException
      */
@@ -33,6 +33,16 @@ public class JSON {
      */
     public static <T> String objectToJsonString(Object object, Class<T> classToCastTo) throws JsonProcessingException {
         return JSON.objectMapper.writeValueAsString((T)object);
+    }
+   
+    /**
+     * 
+     * @param object
+     * @return JSON String from the Jackson API 
+     * @throws JsonProcessingException
+     */
+    public static String toJson(Object object) throws JsonProcessingException {
+        return JSON.objectMapper.writeValueAsString(object);
     }
 
     /**

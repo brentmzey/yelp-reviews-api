@@ -37,10 +37,4 @@ public class DotEnvFileToSysProps {
             System.out.println(e.getMessage());
         }
     }
-    // System.getProperties();
-        // System.getenv().forEach((k, v) -> {
-        //                             if (k == "YELP_API_KEY")
-        //                                 System.out.println(k + "=" + v);
-        //                         }
-        // );
 }

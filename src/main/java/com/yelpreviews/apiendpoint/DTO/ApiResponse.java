@@ -18,16 +18,16 @@ public class ApiResponse {
     private String businessId;
     private String city;
 
-    public ApiResponse(JsonNode reviewArrayNode, JsonNode bizSearchNode) throws JsonMappingException, JsonProcessingException, IllegalArgumentException {
-        Iterator<Map<String, ?>> reviewListIter = (Iterator<Map<String, ?>>)JSON.jsonToObject(reviewArrayNode, ArrayList.class).iterator();
-        while(reviewListIter.hasNext())
+    public ApiResponse(JsonNode reviewsArrayNode, JsonNode bizSearchNode) throws JsonMappingException, JsonProcessingException, IllegalArgumentException {
+        Iterator<Map<String, ?>> reviewListIter = (Iterator<Map<String, ?>>)JSON.jsonToObject(reviewsArrayNode, ArrayList.class).iterator();
+        while(reviewListIter.hasNext()){
             this.yelpReviewList.add(JSON.jsonToObject(JSON.parseJsonString(JSON.objectToJsonString(reviewListIter.next(), Map.class)), YelpReview.class));
-            // this.yelpReviewList.add(JSON.jsonToObject(JSON.parseJsonString(JSON.objectMapper.writeValueAsString(reviewListIter.next())), YelpReview.class));
+        }
         YelpBizSearch yelpBizSearch = JSON.jsonToObject(bizSearchNode, YelpBizSearch.class);
         this.businessName = yelpBizSearch.getBizName();
         this.businessId = yelpBizSearch.getBizId();
         this.city = yelpBizSearch.getBizCity();
-    }
+        }
 
     public String toJson() throws JsonProcessingException {
         return JSON.objectToJsonString(this, this.getClass());
