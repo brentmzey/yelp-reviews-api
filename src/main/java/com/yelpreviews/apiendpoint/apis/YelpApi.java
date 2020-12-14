@@ -4,6 +4,7 @@ import java.util.Map;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.yelpreviews.apiendpoint.DTO.YelpApiErrors;
 import com.yelpreviews.apiendpoint.exceptions.IncorrectDotEnvFileFormat;
 import com.yelpreviews.apiendpoint.utils.DotEnvFileToSysProps;
 import com.yelpreviews.apiendpoint.utils.JSON;
@@ -44,11 +45,12 @@ public class YelpApi {
                             if (res.statusCode().equals(HttpStatus.OK)) {
                                 return res.bodyToMono(String.class);
                             }
-                            else if (res.statusCode().is4xxClientError()) {
-                                return res.bodyToMono(String.class);
-                            }
-                            else if (res.statusCode().is5xxServerError()) {
-                                return Mono.just("Issue grabbing a correct response. Try submitting different search terms.");
+                            else if (res.statusCode().is4xxClientError() || res.statusCode().is5xxServerError()) {
+                                try {
+                                  return Mono.just(JSON.toJson(res.bodyToMono(YelpApiErrors.class)));
+                                } catch (JsonProcessingException e) {
+                                  System.out.println(e.getMessage());
+                                }
                             }
                             throw res.createException().block();
                         }

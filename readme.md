@@ -1,22 +1,39 @@
 # Yelp API
 
+## Served Location
+
+- This API is currently served on Heroku at this [root URI: "https://yelpreviews-api.herokuapp.com"](https://yelpreviews-api.herokuapp.com)
+
+- The API can be served locally by running this Maven SpringBoot project on your local machine at "http://localhost:8080"
+
 ## Endpoints
 
-1. Search by Yelp Business ID
+There are two main endpoints:
+
+- Search by Yelp Business ID
+- Search with food/drink category term & a location (city name, zip code, street address, etc.)
+
+### Search by Yelp Business ID
 
 - /reviews/{yelpBusinessId}
 
 - **Example**
   - /reviews/mhrW9O0O5hXGXGnEYBVoag
 
-    - *JSON Response*
+  - *JSON Response*
+
+    - Returns one Yelp business search with the 3 reviews that the Yelp API returns for this business' ID
 
 ```json
 {
   "businessName": "Jacques-Imo's Cafe",
   "businessId": "mhrW9O0O5hXGXGnEYBVoag",
+  "imageUrl": "https://s3-media4.fl.yelpcdn.com/bphoto/anNM52mDk_L6Dt96H6OoKQ/o.jpg",
+  "address": "8324 Oak St",
   "city": "New Orleans",
   "zipCode": "70118",
+  "state": "LA",
+  "country": "US",
   "reviews": [
     {
       "rating": 5,
@@ -40,26 +57,35 @@
 }
 ```
 
-### Search by TERM and LOCATION
+### Search by Term & Location
 
 - /reviews?term={term}&location={location}
 
 - **Example**
-
   - /reviews?term=pastry&location=milwaukee
 
   - *JSON Response*
 
+    - "count" is total number of Yelp businesses that match this search
+    - "limit" is the max numer of business returned by this API (starting from the top of what the Yelp API returns)
+    - Returns at most 10 business responses inside the "data" array
+    - Each object node inside the "data" array is one business search in the same structure as searching by Yelp business ID as the above JSON response
+
 ```json
 
+{
   "count": 442,
   "limit": 10,
   "data": [
     {
-      "businessName": "Greige Patisserie",
-      "businessId": "hbHpNAylcxQmssDPcU1G1g",
+      "businessName": "Amaranth Bakery & Cafe",
+      "businessId": "pz1thL9deYZ6wLRifH600w",
+      "imageUrl": "https://s3-media1.fl.yelpcdn.com/bphoto/zXGPu3hFwOsGi0AcIPvdsQ/o.jpg",
+      "address": "3329 W Lisbon Ave",
       "city": "Milwaukee",
-      "zipCode": "53204",
+      "zipCode": "53208",
+      "state": "WI",
+      "country": "US",
       "reviews": [
         {
           "rating": 5,
@@ -82,58 +108,67 @@
       ]
     },
     {
-      "businessName": "Miss Molly's Cafe & Pastry Shop",
-      "businessId": "quWY1Gu2k_UjDf4ZHJp9wQ",
-      "city": "Milwaukee",
-      "zipCode": "53222",
+      "businessName": "Rocket Baby Bakery",
+      "businessId": "_aC_2Oe-3CZCaRzQBdhemw",
+      "imageUrl": "https://s3-media1.fl.yelpcdn.com/bphoto/FJfkQR3fWcaq1nLHF43DqQ/o.jpg",
+      "address": "6822 W North Ave",
+      "city": "Wauwatosa",
+      "zipCode": "53213",
+      "state": "WI",
+      "country": "US",
       "reviews": [
         {
           "rating": 5,
-          "review": "We have only tried the raspberry thumbprints, but they are divine. My 7-year old would like to say:worlds best cookie",
-          "userName": "Charlotte H.",
-          "userAvatarUrl": "https://s3-media4.fl.yelpcdn.com/photo/v4Oepb3ki2JB8c714Bs21g/o.jpg"
+          "review": "Worth every penny...yum! We took advantage of their Easter special which was take and bake cinnamon rolls due to COVID-19. I saw the promotion via...",
+          "userName": "Monica H.",
+          "userAvatarUrl": "https://s3-media3.fl.yelpcdn.com/photo/OFXkSjvTzqubW1g4pwYgQQ/o.jpg"
         },
         {
           "rating": 5,
-          "review": "Fantastic spot. We stopped in on a rainy Saturday for savory brioche and coffee, ended up with a ginger cookie and a oatmeal pecan chocolate chip cookie......",
-          "userName": "Vee B.",
-          "userAvatarUrl": "https://s3-media2.fl.yelpcdn.com/photo/I6gMGHb-7hJxRa7TVKWzwQ/o.jpg"
+          "review": "That bakery smell!\n\nI've gone to the gym down below for a few years now and have to say, the armoma that comes thru the concrete is the best worst thing for...",
+          "userName": "Andy K.",
+          "userAvatarUrl": "https://s3-media1.fl.yelpcdn.com/photo/oO8GkaNLUJCTdRHEUSmp8g/o.jpg"
         },
         {
           "rating": 5,
-          "review": "A quaint little cafe that packs a Parisian punch. Their soup is fabulous (I tried an unforgettable fish chowder), and their pastry is spot-on. Best...",
-          "userName": "Brittany J.",
-          "userAvatarUrl": null
+          "review": "I don't often review places outside my residential community but I must tell you about this little gem. I was invited here for a Corporate holiday event. I...",
+          "userName": "Phyllis W.",
+          "userAvatarUrl": "https://s3-media3.fl.yelpcdn.com/photo/62npQ-OIBi-5Cum9b3leCw/o.jpg"
         }
       ]
     },
     ...
     {
-      "businessName": "O&H Danish Bakery",
-      "businessId": "j4so6lQwBuiqWvsTpJCPTw",
-      "city": "Oak Creek",
-      "zipCode": "53154",
+      "businessName": "Sprocket Cafe",
+      "businessId": "HR6go9bqjRJh6J5OgEm-rQ",
+      "imageUrl": "https://s3-media3.fl.yelpcdn.com/bphoto/8XePu9gdgZ3npZEbO7-UUw/o.jpg",
+      "address": "3385 S Kinnickinnic Ave",
+      "city": "Milwaukee",
+      "zipCode": "53207",
+      "state": "WI",
+      "country": "US",
       "reviews": [
         {
           "rating": 5,
-          "review": "If you're looking for amazing themed cakes or just tasty treats like Italian cookies, this is the place to go. Alex and Antonella are very good at what they...",
-          "userName": "Jonny R.",
-          "userAvatarUrl": "https://s3-media1.fl.yelpcdn.com/photo/4NRaGBJadUHFQ2MzNq6YOQ/o.jpg"
-        },
-        {
-          "rating": 5,
-          "review": "AMAZING! That's the one word that comes to mind. They made an ADORABLE delicious cake for my son's birthday just the way he requested. Antonella was a...",
-          "userName": "Fawn S.",
-          "userAvatarUrl": null
+          "review": "This has become my all time favorite \"for anything delicious, place!\" The quality of their food goes above and beyond, right down to the packaging! It's all...",
+          "userName": "Jayne N.",
+          "userAvatarUrl": "https://s3-media4.fl.yelpcdn.com/photo/i8S0XpeMwf-ACWdayP6nPg/o.jpg"
         },
         {
           "rating": 4,
-          "review": "I have been meaning to get over here for a while and today I finally made it but even though I have traveled the area many times I still couldn't remember...",
-          "userName": "Steven T.",
-          "userAvatarUrl": "https://s3-media1.fl.yelpcdn.com/photo/ISSy_2qWm4gf02DjHIWdRw/o.jpg"
+          "review": "During a visit to the south side of Milwaukee I checked my bookmarks for any breakfast places I hadn't been to and O&H was the first one in the list. I...",
+          "userName": "Greg B.",
+          "userAvatarUrl": "https://s3-media1.fl.yelpcdn.com/photo/u0tWTlJrmEb9hBeY7wxDUg/o.jpg"
+        },
+        {
+          "rating": 4,
+          "review": "On the list of topics for last week's random banter with my brother was such burning questions as: when was the last time we encountered such an opinion...",
+          "userName": "Tricia D.",
+          "userAvatarUrl": "https://s3-media1.fl.yelpcdn.com/photo/aCCigSJNsLOHwEaCAY_cHQ/o.jpg"
         }
       ]
     }
-  ]
+  ],
+  "errors": null
 }
 ```

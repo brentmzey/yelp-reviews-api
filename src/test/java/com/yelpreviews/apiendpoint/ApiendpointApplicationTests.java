@@ -11,29 +11,50 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.yelpreviews.apiendpoint.DTO.YelpBizSearch;
 import com.yelpreviews.apiendpoint.DTO.YelpReview;
 import com.yelpreviews.apiendpoint.utils.JSON;
-
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeAll;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.reactive.server.WebTestClient;
 
 @SpringBootTest
 class ApiendpointApplicationTests {
+	private static WebTestClient webTestClient;
 
-	// ADD WEBTEST CLIENT tests to bind actions that simulate Client operations on the service
-	// @Test
-	// void testYelpApiEndpointAuthorization() {
-	// 	WebClient yelpReviews = WebClient.create("https://localhost:8080");
-	// 	Mono<String> jsonResponse = yelpReviews.get().uri(uri, uriVariables)
-	// }
+	@BeforeAll
+	public static void before() {
+		String serverUrlToBind = System.getenv().get("YELP_API_KEY") != null ? "https://yelpreviews-api.herokuapp.com" : "http://localhost:8080";
+		ApiendpointApplicationTests.webTestClient = WebTestClient.bindToServer().baseUrl(serverUrlToBind).build();
+	}
+
+	@Test
+	void simWebClientActions() {
+		ApiendpointApplicationTests.webTestClient.get()
+		.uri(builder -> builder.path("/reviews").queryParam("term", "burger").queryParam("location", "milwaukee").build())
+		.accept(MediaType.APPLICATION_JSON).exchange()
+		.expectStatus().is2xxSuccessful();
+		// .expectBody(YelpBizSearch.class);
+	}
 
 	@Test
 	void testJsonDeserializationBuisnessData() throws IOException {
-		String testBizSearchJsonResponse = new String(Files.readAllBytes(Paths.get(System.getProperty("user.dir"), "sampleBizSearch.json")));
+		String testBizSearchJsonResponse = new String(Files.readAllBytes(Paths.get(System.getProperty("user.dir"), "sampleBizSearchById.json")));
+		String testReviewsJsonResponse = new String(Files.readAllBytes(Paths.get(System.getProperty("user.dir"), "sampleBizSearchByIdReviews.json")));
+		
 		JsonNode rootNode = JSON.parseJsonString(testBizSearchJsonResponse);
-		YelpBizSearch bizSearch = JSON.jsonToObject(rootNode.get("businesses").get(0), YelpBizSearch.class);
 
-		System.out.println(JSON.objectMapper.writeValueAsString(bizSearch));
+		YelpBizSearch yelpBizSearch = JSON.jsonToObject(rootNode, YelpBizSearch.class);
+		List<YelpReview> yelpReviewList = new ArrayList<>();
+		JsonNode rootReviewsNode = JSON.parseJsonString(testReviewsJsonResponse).get("reviews");
+        Iterator<JsonNode> reviewListIter = rootReviewsNode.iterator();
+            while(reviewListIter.hasNext()){
+                yelpReviewList.add(JSON.jsonToObject(reviewListIter.next(), YelpReview.class));
+            }
+        yelpBizSearch.setBizReviews(yelpReviewList);
 
-		assertEquals("{\"businessName\":\"Four Barrel Coffee\",\"businessId\":\"E8RJkjfdcwgtyoPMjQ_Olg\",\"city\":\"San Francisco\",\"zipCode\":\"94103\"}", JSON.objectMapper.writeValueAsString(bizSearch));
+		System.out.println(JSON.toJson(yelpBizSearch));
+
+		assertEquals("{\"businessName\":\"Brieux Carré Brewing Company\",\"businessId\":\"asz2Bsfk5vIn6Hh4K4BQeQ\",\"imageUrl\":\"https://s3-media1.fl.yelpcdn.com/bphoto/754x7Y2uKo3fj_lJgEbfGg/o.jpg\",\"address\":\"2115 Decatur St\",\"city\":\"New Orleans\",\"zipCode\":\"70116\",\"state\":\"LA\",\"country\":\"US\",\"reviews\":[{\"rating\":5,\"review\":\"My husband was annoyed at my insistence that Cafe Du Monde was the first thing we do in New Orleans so I appeased him by immediately taking him here after...\",\"userName\":\"Stacy O.\",\"userAvatarUrl\":\"https://s3-media1.fl.yelpcdn.com/photo/f8aEjovztyEfBydun3osTg/o.jpg\"},{\"rating\":5,\"review\":\"Enjoyed a quick pit stop here on our beer walk.   Good variety of IPA and wandered in at the perfect time the place wasn\'t super packed.  The staff was...\",\"userName\":\"Codie Nicole B.\",\"userAvatarUrl\":\"https://s3-media3.fl.yelpcdn.com/photo/iSFUxKR0etwg73CXX1cYCg/o.jpg\"},{\"rating\":5,\"review\":\"A really great time with really great beer. I went recently on a Saturday night and at 8 pm they had a free comedy show which was very entertaining (I...\",\"userName\":\"Steven G.\",\"userAvatarUrl\":\"https://s3-media3.fl.yelpcdn.com/photo/Uu-48h0r8klon9AKKhGlrA/o.jpg\"}]}", JSON.toJson(yelpBizSearch));
 
 	}
 	
