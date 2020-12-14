@@ -35,9 +35,6 @@ public class YelpApi {
     }
 
     public Mono<String> apiCall(CallType callType, PathBuilder uriBuilderFnc, Map<String,String> uriVars, HttpMethod httpMethod) throws JsonProcessingException {
-        // if(callType == CallType.BUSINESS && this.prefetechBizDataJson != null) { //uriBuilderFnc.buildPath(uriVars) == ("/search?term=" + uriVars.get("term") + "&location=" + uriVars.get("location") )
-        //     return Mono.just(JSON.toJson(this.prefetechBizDataJson));
-        // }
         return this.getWebClient(this.YELP_API_ROOT_URL)
                     .method(httpMethod)
                     .uri(uriBuilderFnc.buildPath(uriVars))
@@ -51,7 +48,7 @@ public class YelpApi {
                                 return res.bodyToMono(String.class);
                             }
                             else if (res.statusCode().is5xxServerError()) {
-                                return Mono.just("<h3>Issue grabbing a correct response.</h3><h5>Try submitting different search terms.</h5>");
+                                return Mono.just("Issue grabbing a correct response. Try submitting different search terms.");
                             }
                             throw res.createException().block();
                         }
