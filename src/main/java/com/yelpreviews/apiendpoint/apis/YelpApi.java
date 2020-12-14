@@ -4,7 +4,6 @@ import java.util.Map;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.yelpreviews.apiendpoint.DTO.YelpBizSearch;
 import com.yelpreviews.apiendpoint.exceptions.IncorrectDotEnvFileFormat;
 import com.yelpreviews.apiendpoint.utils.DotEnvFileToSysProps;
 import com.yelpreviews.apiendpoint.utils.JSON;
@@ -21,7 +20,6 @@ public class YelpApi {
     private PathBuilder bizSearchUriBuilder;
     private HttpMethod httpMethod;
     private Map<String,String> uriVars;
-    private Mono<String> prefetchedBizDetails;
     private String API_KEY = System.getenv().get("YELP_API_KEY");
 
     {
@@ -36,10 +34,10 @@ public class YelpApi {
          }
     }
 
-    public Mono<String> apiCall(PathBuilder uriBuilderFnc, Map<String,String> uriVars, HttpMethod httpMethod) {
-        if(uriBuilderFnc.buildPath(uriVars) == ("/" + uriVars.get("bizId")) && this.prefetchedBizDetails != null) { 
-            return this.prefetchedBizDetails; 
-        }
+    public Mono<String> apiCall(CallType callType, PathBuilder uriBuilderFnc, Map<String,String> uriVars, HttpMethod httpMethod) throws JsonProcessingException {
+        // if(callType == CallType.BUSINESS && this.prefetechBizDataJson != null) { //uriBuilderFnc.buildPath(uriVars) == ("/search?term=" + uriVars.get("term") + "&location=" + uriVars.get("location") )
+        //     return Mono.just(JSON.toJson(this.prefetechBizDataJson));
+        // }
         return this.getWebClient(this.YELP_API_ROOT_URL)
                     .method(httpMethod)
                     .uri(uriBuilderFnc.buildPath(uriVars))
@@ -63,7 +61,7 @@ public class YelpApi {
     public JsonNode toJsonNode(CallType callType, String apiCallResultString, boolean isBizDetailsSingleton) throws JsonMappingException, JsonProcessingException {
         switch (callType) {
             case REVIEWS:
-                return JSON.parseJsonString(apiCallResultString).get("reviews");
+                return JSON.parseJsonString(apiCallResultString);
             case BUSINESS:
                 if(isBizDetailsSingleton) {
                     return JSON.parseJsonString("{ \"businesses\": [" + apiCallResultString + "]}");
@@ -74,19 +72,6 @@ public class YelpApi {
         }
     }
 
-    
-    public YelpApi(PathBuilder reviewsSearchUriBuilder, PathBuilder bizSearchUriBuilder, HttpMethod httpMethod, Map<String,String> uriVars, boolean isBizSearchCallFirst) throws JsonMappingException, JsonProcessingException, IllegalArgumentException {
-        this.reviewsSearchUriBuilder = reviewsSearchUriBuilder;
-        this.bizSearchUriBuilder = bizSearchUriBuilder;
-        this.httpMethod = httpMethod;
-        this.uriVars = uriVars;
-        if (isBizSearchCallFirst) {
-            // First need to fetch the Yelp Business ID before fetching reviews for that business
-            this.prefetchedBizDetails = apiCall(bizSearchUriBuilder, uriVars, httpMethod);
-            // Add the business id to the uriVars Map -- only grabbing the first result from that JSON ArrayNode of businesses
-            this.uriVars.put("bizId", JSON.jsonToObject(JSON.parseJsonString(this.prefetchedBizDetails.block()), YelpBizSearch.class).getBizId());
-        }
-    }
 
     /**
      * Fewer args constructor when it is not required to prefetch Yelp Business Id and details before fetching the reviews. This is the constructor used when the Yelp business id is pre-specified in the URL path and passed in from the controller function
@@ -99,7 +84,10 @@ public class YelpApi {
      * @throws IllegalArgumentException
      */
     public YelpApi(PathBuilder reviewsSearchUriBuilder, PathBuilder bizSearchUriBuilder, HttpMethod httpMethod, Map<String,String> uriVars) throws JsonMappingException, JsonProcessingException, IllegalArgumentException {
-        this(reviewsSearchUriBuilder, bizSearchUriBuilder, httpMethod, uriVars, false);
+        this.reviewsSearchUriBuilder = reviewsSearchUriBuilder;
+        this.bizSearchUriBuilder = bizSearchUriBuilder;
+        this.httpMethod = httpMethod;
+        this.uriVars = uriVars;  
     }
 
     /**
