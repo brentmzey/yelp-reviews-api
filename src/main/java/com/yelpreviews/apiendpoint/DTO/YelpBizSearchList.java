@@ -1,9 +1,14 @@
 package com.yelpreviews.apiendpoint.DTO;
 
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+@JsonInclude(Include.NON_NULL)
 @JsonPropertyOrder({ "count", "limit", "data", "errors" })
 public class YelpBizSearchList {
     private int count;
@@ -45,15 +50,14 @@ public class YelpBizSearchList {
         this.count = Integer.valueOf(count).intValue(); 
     }
     @JsonSetter("limit")
-    public void setlimit(String limit) { 
+    public void setLimit(String limit) { 
         this.limit = Integer.valueOf(limit).intValue(); 
     }
     @JsonSetter("data")
     public void setData(List<YelpBizSearch> businessesList) { 
         this.data = businessesList;
     }
-    @JsonSetter("errors")
+    @JsonAlias({"error", "errors"})
     public void setErrors(YelpApiErrors errors) { this.errors = errors; };
-
 
 }

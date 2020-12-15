@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
-@JsonPropertyOrder({ "businessName", "businessId", "imageUrl", "address", "city", "zipCode", "state", "country", "reviews" })
+@JsonPropertyOrder({ "businessName", "businessId", "imageUrl", "address", "city", "zipCode", "state", "country", "reviews", "errors" })
 @JsonIgnoreProperties({ "bizLocation" })
 public class YelpBizSearch {
     private String bizId;

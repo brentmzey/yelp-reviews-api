@@ -64,7 +64,6 @@ class ApiendpointApplicationTests {
 		String testBizSearchJsonResponse = new String(Files.readAllBytes(Paths.get(System.getProperty("user.dir"), "sampleBizSearch.json")));
 		JsonNode rootBizNode = JSON.parseJsonString(testBizSearchJsonResponse).get("businesses");
 		JsonNode rootReviewsNode = JSON.parseJsonString(testReviewsJsonResponse).get("reviews");
-		// List<YelpReview> reviews = yelpBizSearch.getReviews();
 
 		YelpBizSearch yelpBizSearch = JSON.jsonToObject(rootBizNode, YelpBizSearch.class);
 		List<YelpReview> yelpReviewList = new ArrayList<>();

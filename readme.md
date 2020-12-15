@@ -1,4 +1,4 @@
-# Yelp API
+# Yelp API Wrapper
 
 ## Served Location
 
@@ -168,7 +168,39 @@ There are two main endpoints:
         }
       ]
     }
-  ],
-  "errors": null
+  ]
+}
+```
+
+### API Errors
+
+- This API Wrapper will return an HTTP 400 response status with an error array explaining as such
+
+- **Example**
+  - /reviews?term=burger&location=*blank*
+
+  - *JSON Response*
+
+```json
+null
+```
+
+- This API Wrapper will reject any invalid request syntax and return an HTTP 400 response status
+
+- **Examples**
+  - /reviews?t=burger&locat
+
+  - /reviews/{*non-existant-yelp-business-id*}
+
+    - *JSON Response*
+
+```json
+{
+  "error": [
+    {
+      "message": "Bad request response from the Yelp API.",
+      "statusCode": "400"
+    }
+  ]
 }
 ```

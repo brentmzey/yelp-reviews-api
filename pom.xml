@@ -11,7 +11,7 @@
 	<artifactId>apiendpoint</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>apiendpoint</name>
-	<description>Demo project for Spring Boot</description>
+	<description>Yelp API Wrapper</description>
 
 	<properties>
 		<java.version>15</java.version>

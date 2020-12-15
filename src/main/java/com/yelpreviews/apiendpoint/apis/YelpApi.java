@@ -1,17 +1,19 @@
 package com.yelpreviews.apiendpoint.apis;
 
+import java.util.List;
 import java.util.Map;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.yelpreviews.apiendpoint.DTO.YelpApiErrors;
 import com.yelpreviews.apiendpoint.exceptions.IncorrectDotEnvFileFormat;
 import com.yelpreviews.apiendpoint.utils.DotEnvFileToSysProps;
 import com.yelpreviews.apiendpoint.utils.JSON;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 public class YelpApi {
@@ -35,28 +37,61 @@ public class YelpApi {
          }
     }
 
-    public Mono<String> apiCall(CallType callType, PathBuilder uriBuilderFnc, Map<String,String> uriVars, HttpMethod httpMethod) throws JsonProcessingException {
+    /**
+     * Interfacing method to call the Yelp API
+     * @param callType
+     * @param uriBuilderFnc
+     * @param uriVars
+     * @param httpMethod
+     * @return Mono<String> offering unbounded control to the API response
+     * @throws JsonProcessingException
+     */
+    public Mono<ResponseEntity<JsonNode>> apiCall(CallType callType, PathBuilder uriBuilderFnc, Map<String,String> uriVars, HttpMethod httpMethod) throws ResponseStatusException, JsonProcessingException {
         return this.getWebClient(this.YELP_API_ROOT_URL)
                     .method(httpMethod)
                     .uri(uriBuilderFnc.buildPath(uriVars))
                     .header("Authorization", "Bearer " + API_KEY)
                     .accept(MediaType.APPLICATION_JSON)
                     .exchangeToMono(res -> {
-                            if (res.statusCode().equals(HttpStatus.OK)) {
-                                return res.bodyToMono(String.class);
+                        if (res.statusCode().equals(HttpStatus.OK)) {
+                            return res.toEntity(JsonNode.class);
+                        } else if (res.statusCode().is4xxClientError()) {
+                            try {
+                              throw new ResponseStatusException(HttpStatus.BAD_REQUEST, JSON.toJson(Map.of("error", List.of(Map.of("statusCode", "400", "message", "Bad request response from the Yelp API.")))));
+                            } catch (JsonProcessingException e) {
+                                System.out.println(e.getMessage());
                             }
-                            else if (res.statusCode().is4xxClientError() || res.statusCode().is5xxServerError()) {
-                                try {
-                                  return Mono.just(JSON.toJson(res.bodyToMono(YelpApiErrors.class)));
-                                } catch (JsonProcessingException e) {
-                                  System.out.println(e.getMessage());
-                                }
+                            // try {
+                            //   throw new ResponseStatusException(HttpStatus.BAD_REQUEST, JSON.toJson(res.bodyToMono(YelpApiErrors.class).block()));
+                            // } catch (JsonProcessingException e) {
+                            //     System.out.println(e.getMessage());
+                            // }
+                        } else {
+                            try {
+                              throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, JSON.toJson(Map.of("error", List.of(Map.of("statusCode", "500", "message", "Internal server error on the Yelp API.")))));
+                            } catch (JsonProcessingException e) {
+                              System.out.println(e.getMessage());
                             }
-                            throw res.createException().block();
+                            // try {
+                            //   throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, JSON.toJson(res.bodyToMono(YelpApiErrors.class)));
+                            // } catch (JsonProcessingException e) {
+                            //   System.out.println(e.getMessage());
+                            // }
                         }
-                    );
+                        return null;
+                    });
+                    // .toEntity(JsonNode.class);
     }
 
+    /**
+     * 
+     * @param callType
+     * @param apiCallResultString
+     * @param isBizDetailsSingleton
+     * @return Jackson API JsonNode from a Yelp API call result
+     * @throws JsonMappingException
+     * @throws JsonProcessingException
+     */
     public JsonNode toJsonNode(CallType callType, String apiCallResultString, boolean isBizDetailsSingleton) throws JsonMappingException, JsonProcessingException {
         switch (callType) {
             case REVIEWS:
