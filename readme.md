@@ -179,6 +179,10 @@ There are two main endpoints:
 - **Example**
   - /reviews?term=burger&location=*blank*
 
+  - *HTTP Status Code Response*
+
+    - 400 - BAD_REQUEST
+
   - *JSON Response*
 
 ```json
@@ -190,9 +194,13 @@ null
 - **Examples**
   - /reviews?t=burger&locat
 
-  - /reviews/{*non-existant-yelp-business-id*}
+  - /reviews/{*Non-existant Yelp Business ID*}
 
-    - *JSON Response*
+  - *HTTP Status Code Response*
+
+    - 400 - BAD_REQUEST
+  
+  - *JSON Response*
 
 ```json
 {
