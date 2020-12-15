@@ -61,26 +61,15 @@ public class YelpApi {
                             } catch (JsonProcessingException e) {
                                 System.out.println(e.getMessage());
                             }
-                            // try {
-                            //   throw new ResponseStatusException(HttpStatus.BAD_REQUEST, JSON.toJson(res.bodyToMono(YelpApiErrors.class).block()));
-                            // } catch (JsonProcessingException e) {
-                            //     System.out.println(e.getMessage());
-                            // }
                         } else {
                             try {
                               throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, JSON.toJson(Map.of("error", List.of(Map.of("statusCode", "500", "message", "Internal server error on the Yelp API.")))));
                             } catch (JsonProcessingException e) {
                               System.out.println(e.getMessage());
                             }
-                            // try {
-                            //   throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, JSON.toJson(res.bodyToMono(YelpApiErrors.class)));
-                            // } catch (JsonProcessingException e) {
-                            //   System.out.println(e.getMessage());
-                            // }
                         }
                         return null;
                     });
-                    // .toEntity(JsonNode.class);
     }
 
     /**

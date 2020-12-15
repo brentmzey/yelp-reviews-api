@@ -80,8 +80,6 @@ public class Controller {
         List<Map<String,?>> prefetchedBizList = (ArrayList<Map<String,?>>)JSON.jsonToObject(prefetchedBizJsonObject.get("businesses"), ArrayList.class);
                     
         List<YelpBizSearch> dataList = new ArrayList<>();
-        System.out.println("Json Object: " + prefetchedBizJsonObject);
-        System.out.println("Array Object: " + prefetchedBizList);
         for (Map<String,?> business : prefetchedBizList.subList(0, prefetchedBizList.size() <= searchResultsLimit ? prefetchedBizList.size() : searchResultsLimit)) {
             Map<String, String> uriVarz = yelpApi.getUriVars();
             uriVarz.put("bizId", (String)business.get("id"));

@@ -1,7 +1,6 @@
 package com.yelpreviews.apiendpoint.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.yelpreviews.apiendpoint.utils.JSON;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
