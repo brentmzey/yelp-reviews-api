@@ -174,7 +174,7 @@ There are two main endpoints:
 
 ### API Errors
 
-- This API Wrapper will return an HTTP 400 response status with an error array explaining as such
+- This API Wrapper will reject any invalid request syntax and return an HTTP 400 response status
 
 - **Example**
   - /reviews?term=burger&location=*blank*
@@ -189,7 +189,7 @@ There are two main endpoints:
 null
 ```
 
-- This API Wrapper will reject any invalid request syntax and return an HTTP 400 response status
+- This API Wrapper will return an HTTP 400 response status with an error array explaining as such
 
 - **Examples**
   - /reviews?t=burger&locat

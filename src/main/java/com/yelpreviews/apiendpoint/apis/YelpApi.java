@@ -1,11 +1,11 @@
 package com.yelpreviews.apiendpoint.apis;
 
-import java.util.List;
 import java.util.Map;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.yelpreviews.apiendpoint.exceptions.IncorrectDotEnvFileFormat;
+import com.yelpreviews.apiendpoint.exceptions.YelpApiResponseException;
 import com.yelpreviews.apiendpoint.utils.DotEnvFileToSysProps;
 import com.yelpreviews.apiendpoint.utils.JSON;
 import org.springframework.http.HttpMethod;
@@ -28,7 +28,6 @@ public class YelpApi {
     {
         if(API_KEY == null) {
             try {
-            // Grab Yelp API key from .env in root directory
               DotEnvFileToSysProps.setCredentialsAsSystemProperties();
               API_KEY = System.getProperty("YELP_API_KEY");
             } catch (IncorrectDotEnvFileFormat e) {
@@ -53,22 +52,23 @@ public class YelpApi {
                     .header("Authorization", "Bearer " + API_KEY)
                     .accept(MediaType.APPLICATION_JSON)
                     .exchangeToMono(res -> {
+                        Mono<ResponseEntity<JsonNode>> successfulFetch = Mono.empty();
                         if (res.statusCode().equals(HttpStatus.OK)) {
-                            return res.toEntity(JsonNode.class);
+                            successfulFetch = res.toEntity(JsonNode.class);
                         } else if (res.statusCode().is4xxClientError()) {
-                            try {
-                              throw new ResponseStatusException(HttpStatus.BAD_REQUEST, JSON.toJson(Map.of("error", List.of(Map.of("statusCode", "400", "message", "Bad request response from the Yelp API.")))));
-                            } catch (JsonProcessingException e) {
-                                System.out.println(e.getMessage());
-                            }
+                              try {
+                                throw new YelpApiResponseException(res.toEntity(JsonNode.class));
+                              } catch (JsonProcessingException | IllegalArgumentException e) {
+                                System.out.println(e.getLocalizedMessage());
+                              }
                         } else {
                             try {
-                              throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, JSON.toJson(Map.of("error", List.of(Map.of("statusCode", "500", "message", "Internal server error on the Yelp API.")))));
-                            } catch (JsonProcessingException e) {
-                              System.out.println(e.getMessage());
+                                throw new YelpApiResponseException(res.toEntity(JsonNode.class));
+                            } catch (JsonProcessingException | IllegalArgumentException e) {
+                                System.out.println(e.getLocalizedMessage());
                             }
                         }
-                        return null;
+                        return successfulFetch;
                     });
     }
 
