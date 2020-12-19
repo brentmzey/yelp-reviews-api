@@ -123,6 +123,12 @@
 				<artifactId>heroku-maven-plugin</artifactId>
 				<version>3.6.2</version>
 			</plugin>
+			<plugin>
+				<groupId>com.hubspot.maven.plugins</groupId>
+				<artifactId>prettier-maven-plugin</artifactId>
+				<!-- Find the latest version at https://github.com/jhipster/prettier-java/releases -->
+				<version>1.0.1</version>
+			</plugin>
 		</plugins>
 	</build>
 

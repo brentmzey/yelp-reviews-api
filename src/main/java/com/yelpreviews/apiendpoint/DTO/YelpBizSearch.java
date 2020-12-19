@@ -55,7 +55,7 @@ public class YelpBizSearch {
       this.bizName = bizName;
     }
     @JsonSetter("location")
-    public void setBizCity(Map<String, ?> location) {
+    public void setBizCity(Map<String, String> location) {
       this.bizLocation = location;
       this.bizAddress = (String)location.get("address1");
       this.bizCity = (String)location.get("city");

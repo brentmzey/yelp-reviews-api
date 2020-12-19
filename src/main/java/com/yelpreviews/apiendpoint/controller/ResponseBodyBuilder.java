@@ -1,9 +1,10 @@
 package com.yelpreviews.apiendpoint.controller;
 
 import java.util.Map;
-import com.fasterxml.jackson.databind.JsonNode;
+import com.yelpreviews.apiendpoint.apis.YelpApi;
 import org.springframework.http.ResponseEntity;
+import reactor.core.publisher.Mono;
 
 public interface ResponseBodyBuilder {
-    ResponseEntity<Object> build(ResponseEntity<JsonNode> bizResponseEntity, ResponseEntity<JsonNode> reviewsResponseEntity, Map<String,String> uriVars);
+    Mono<ResponseEntity<Object>> build(YelpApi yelpApi, Map<String,String> uriVars);
 }

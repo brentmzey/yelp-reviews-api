@@ -1,9 +1,14 @@
 package com.yelpreviews.apiendpoint.apis;
 
+import java.util.List;
 import java.util.Map;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.yelpreviews.apiendpoint.DTO.ApiError;
+import com.yelpreviews.apiendpoint.DTO.WrapperApiError;
+import com.yelpreviews.apiendpoint.controller.ControllerConfig;
+import com.yelpreviews.apiendpoint.controller.Controller.RouteType;
 import com.yelpreviews.apiendpoint.exceptions.IncorrectDotEnvFileFormat;
 import com.yelpreviews.apiendpoint.exceptions.YelpApiResponseException;
 import com.yelpreviews.apiendpoint.utils.DotEnvFileToSysProps;
@@ -14,7 +19,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.server.ServerErrorException;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 public class YelpApi {
     public enum CallType { REVIEWS, BUSINESS; }
@@ -45,31 +52,52 @@ public class YelpApi {
      * @return Mono<String> offering unbounded control to the API response
      * @throws JsonProcessingException
      */
-    public Mono<ResponseEntity<JsonNode>> apiCall(CallType callType, PathBuilder uriBuilderFnc, Map<String,String> uriVars, HttpMethod httpMethod) throws ResponseStatusException, JsonProcessingException {
+    public Mono<ResponseEntity<JsonNode>> apiCall(RouteType routeType, PathBuilder uriBuilderFnc, PathBuilder reviewsSearchUriBuilder, Map<String,String> uriVars, HttpMethod httpMethod) throws ResponseStatusException, JsonProcessingException {
         return this.getWebClient(this.YELP_API_ROOT_URL)
                     .method(httpMethod)
                     .uri(uriBuilderFnc.buildPath(uriVars))
                     .header("Authorization", "Bearer " + API_KEY)
                     .accept(MediaType.APPLICATION_JSON)
-                    .exchangeToMono(res -> {
-                        Mono<ResponseEntity<JsonNode>> successfulFetch = Mono.empty();
-                        if (res.statusCode().equals(HttpStatus.OK)) {
-                            successfulFetch = res.toEntity(JsonNode.class);
-                        } else if (res.statusCode().is4xxClientError()) {
-                              try {
-                                throw new YelpApiResponseException(res.toEntity(JsonNode.class));
-                              } catch (JsonProcessingException | IllegalArgumentException e) {
-                                System.out.println(e.getLocalizedMessage());
-                              }
-                        } else {
-                            try {
-                                throw new YelpApiResponseException(res.toEntity(JsonNode.class));
-                            } catch (JsonProcessingException | IllegalArgumentException e) {
-                                System.out.println(e.getLocalizedMessage());
-                            }
-                        }
-                        return successfulFetch;
-                    });
+                    .exchangeToMono(res -> { return res.toEntity(JsonNode.class);
+                        // Mono<ResponseEntity<JsonNode>> successfulFetch = Mono.empty();
+                        // if (res.statusCode().equals(HttpStatus.OK)) {
+                        //     successfulFetch = res.toEntity(JsonNode.class);
+                        // } else if (res.statusCode().is4xxClientError()) {
+                        //       try {
+                        //         throw new YelpApiResponseException(res.toEntity(JsonNode.class));
+                        //       } catch (JsonProcessingException | IllegalArgumentException e) {
+                        //         throw new ServerErrorException("INTERNAL_SERVER_ERROR", e);
+                        //       }
+                        // } else {
+                        //     try {
+                        //         throw new YelpApiResponseException(res.toEntity(JsonNode.class));
+                        //     } catch (JsonProcessingException | IllegalArgumentException e) {
+                        //         throw new ServerErrorException("INTERNAL_SERVER_ERROR", e);
+                        //     }
+                        // }
+                        // return successfulFetch;
+                    }).publishOn(Schedulers.single());
+                    // .doOnSuccess((res) -> {
+                    //     ControllerConfig config = new ControllerConfig();
+                    //     if(routeType == RouteType.SEARCH_BY_TERMS) {
+                    //         try {
+                    //           config.getSearchByTermsRouteResponseBuilder().build(Mono.just(res), this, this.uriVars);
+                    //         } catch (ResponseStatusException e) {
+                    //           Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "NOT_FOUND", e));
+                    //         }
+                    //     }
+                    //     if(routeType == RouteType.SEARCH_BY_ID) {
+                    //         try{
+                    //             config.getSearchByIdRouteResponseBuilder().build(Mono.just(res), this, this.uriVars);
+                    //         } catch (ResponseStatusException e) {
+                    //           Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "NOT_FOUND", e));
+                    //         }
+                    //     }
+                    // }
+                    // ,
+                    // // // (res) -> { Mono.just(new ResponseEntity<Object>(new ApiError(HttpStatus.NOT_FOUND, "VALIDATION_ERROR", List.of(new WrapperApiError("No search results found on this request"))), HttpStatus.NOT_FOUND));
+                    // }
+                // );
     }
 
     /**
@@ -106,7 +134,7 @@ public class YelpApi {
      * @throws JsonProcessingException
      * @throws IllegalArgumentException
      */
-    public YelpApi(PathBuilder reviewsSearchUriBuilder, PathBuilder bizSearchUriBuilder, HttpMethod httpMethod, Map<String,String> uriVars) throws JsonMappingException, JsonProcessingException, IllegalArgumentException {
+    public YelpApi(PathBuilder bizSearchUriBuilder, PathBuilder reviewsSearchUriBuilder, HttpMethod httpMethod, Map<String,String> uriVars) throws JsonMappingException, JsonProcessingException, IllegalArgumentException {
         this.reviewsSearchUriBuilder = reviewsSearchUriBuilder;
         this.bizSearchUriBuilder = bizSearchUriBuilder;
         this.httpMethod = httpMethod;
@@ -122,5 +150,5 @@ public class YelpApi {
     public PathBuilder getBizSearchUriBuilder() { return this.bizSearchUriBuilder; };
     public HttpMethod getHttpMethod() { return this.httpMethod; };
     public Map<String,String> getUriVars() { return this.uriVars; };
-        
+    
 }

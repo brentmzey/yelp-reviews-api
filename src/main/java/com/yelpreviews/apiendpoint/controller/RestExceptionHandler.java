@@ -62,7 +62,6 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
       return response;
     }
 
-
     @ExceptionHandler({ ServerErrorException.class })
     protected ResponseEntity<Object> handleInternalServerErrors(ServerErrorException ex, WebRequest request) {
       WrapperApiError internalServerError = new WrapperApiError(ex.getMessage());
