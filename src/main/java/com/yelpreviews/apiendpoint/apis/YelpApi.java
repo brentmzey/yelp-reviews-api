@@ -5,7 +5,9 @@ import java.util.Map;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.yelpreviews.apiendpoint.DTO.YelpApiError;
 import com.yelpreviews.apiendpoint.exceptions.IncorrectDotEnvFileFormat;
+import com.yelpreviews.apiendpoint.exceptions.YelpApiResponseException;
 import com.yelpreviews.apiendpoint.utils.DotEnvFileToSysProps;
 import com.yelpreviews.apiendpoint.utils.JSON;
 import org.springframework.http.HttpMethod;
@@ -14,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.server.ServerErrorException;
 import reactor.core.publisher.Mono;
 
 public class YelpApi {
@@ -57,18 +60,17 @@ public class YelpApi {
                             return res.toEntity(JsonNode.class);
                         } else if (res.statusCode().is4xxClientError()) {
                             try {
-                              throw new ResponseStatusException(HttpStatus.BAD_REQUEST, JSON.toJson(Map.of("error", List.of(Map.of("statusCode", "400", "message", "Bad request response from the Yelp API.")))));
+                              throw new YelpApiResponseException(res.toEntity(JsonNode.class));
                             } catch (JsonProcessingException e) {
-                                System.out.println(e.getMessage());
+                                throw new ServerErrorException("INTERNAL_SERVER_ERROR", e);
                             }
                         } else {
                             try {
                               throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, JSON.toJson(Map.of("error", List.of(Map.of("statusCode", "500", "message", "Internal server error on the Yelp API.")))));
                             } catch (JsonProcessingException e) {
-                              System.out.println(e.getMessage());
+                                throw new ServerErrorException("INTERNAL_SERVER_ERROR", e);
                             }
                         }
-                        return null;
                     });
     }
 
@@ -106,7 +108,7 @@ public class YelpApi {
      * @throws JsonProcessingException
      * @throws IllegalArgumentException
      */
-    public YelpApi(PathBuilder reviewsSearchUriBuilder, PathBuilder bizSearchUriBuilder, HttpMethod httpMethod, Map<String,String> uriVars) throws JsonMappingException, JsonProcessingException, IllegalArgumentException {
+    public YelpApi(PathBuilder bizSearchUriBuilder, PathBuilder reviewsSearchUriBuilder, HttpMethod httpMethod, Map<String,String> uriVars) throws JsonMappingException, JsonProcessingException, IllegalArgumentException {
         this.reviewsSearchUriBuilder = reviewsSearchUriBuilder;
         this.bizSearchUriBuilder = bizSearchUriBuilder;
         this.httpMethod = httpMethod;

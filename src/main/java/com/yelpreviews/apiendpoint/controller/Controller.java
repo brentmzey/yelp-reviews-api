@@ -8,16 +8,19 @@ import java.util.List;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.yelpreviews.apiendpoint.DTO.YelpApiErrors;
 import com.yelpreviews.apiendpoint.DTO.YelpBizSearch;
 import com.yelpreviews.apiendpoint.DTO.YelpBizSearchList;
 import com.yelpreviews.apiendpoint.DTO.YelpReview;
 import com.yelpreviews.apiendpoint.apis.YelpApi;
 import com.yelpreviews.apiendpoint.apis.YelpApi.CallType;
+import com.yelpreviews.apiendpoint.exceptions.InvalidRequestParametersException;
 import com.yelpreviews.apiendpoint.utils.JSON;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,22 +28,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestController
+@ComponentScan(basePackageClasses = com.yelpreviews.apiendpoint.controller.ControllerConfig.class)
 public class Controller {
-    int searchResultsLimit = 10;
 
-    protected String bodyToErrorMsgJsonString(JsonNode jsonNode) throws JsonProcessingException, IllegalArgumentException {
-        return JSON.toJson(JSON.jsonToObject(jsonNode, YelpApiErrors.class));
-    }
-
-    protected boolean isErrorStatusCode(ResponseEntity<JsonNode> apiResponse) {
-        if (!apiResponse.getStatusCode().equals(HttpStatus.OK)) {
-            return true;
-        }
-        return false;
-    }
+    public enum RouteType { SEARCH_BY_TERMS, SEARCH_BY_ID };
+    @Autowired
+    private ControllerConfig config;
 
 
     /**
@@ -50,45 +45,41 @@ public class Controller {
      * @return JSON String of some business info with the top 3 reviews from the Yelp API
      * @throws JsonProcessingException
      * @throws WebClientResponseException
+     * @throws InvalidRequestParametersException
      */
-    @GetMapping("/reviews")
-    ResponseEntity<String> reviewsBySearchTerm(@RequestParam("term") String term, @RequestParam("location") String location) throws JsonProcessingException, WebClientResponseException {
-        if (term == null || location == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You must supply both a proper Yelp 'term' and 'location' as request query parameters.");
+    @GetMapping(value = "/reviews", produces = "application/json")
+    @Validated
+    ResponseEntity<Object> reviewsBySearchTerm(@RequestParam("term") String term, @RequestParam(value = "location", required = true) String location) throws JsonProcessingException, WebClientResponseException, InvalidRequestParametersException {
+        if (term == null || term == "" || term.trim() == "") {
+            throw new InvalidRequestParametersException(HttpStatus.BAD_REQUEST, "term", "String", term);
+        }
+        if (location == null || location == "" || location.trim() == "") {
+            throw new InvalidRequestParametersException(HttpStatus.BAD_REQUEST, "location", "String", location);
         }
         HashMap<String,String> pathVars = new HashMap<String,String>();
         pathVars.put("location", location);
         pathVars.put("term", term);
         
         YelpApi yelpApi = new YelpApi(
-            (Map<String,String> uriVariables) -> "/" + uriVariables.get("bizId") + "/reviews",
             (Map<String,String> uriVariables) -> { 
                 return "/search?term=" + uriVariables.get("term") + "&location=" + uriVariables.get("location");
             },
+            (Map<String,String> uriVariables) -> "/" + uriVariables.get("bizId") + "/reviews",
             HttpMethod.GET, pathVars
         );
 
         ResponseEntity<JsonNode> bizResponseEntity = yelpApi.apiCall(CallType.BUSINESS, yelpApi.getBizSearchUriBuilder(), yelpApi.getUriVars(), yelpApi.getHttpMethod()).block();
-        
-        if (isErrorStatusCode(bizResponseEntity)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
-                bodyToErrorMsgJsonString(bizResponseEntity.getBody()));
-        }
 
         JsonNode prefetchedBizJsonObject = bizResponseEntity.getBody();
         int count = prefetchedBizJsonObject.get("total").asInt();
         List<Map<String,?>> prefetchedBizList = (ArrayList<Map<String,?>>)JSON.jsonToObject(prefetchedBizJsonObject.get("businesses"), ArrayList.class);
                     
         List<YelpBizSearch> dataList = new ArrayList<>();
-        for (Map<String,?> business : prefetchedBizList.subList(0, prefetchedBizList.size() <= searchResultsLimit ? prefetchedBizList.size() : searchResultsLimit)) {
+        for (Map<String,?> business : prefetchedBizList.subList(0, prefetchedBizList.size() < config.getSearchResultsLimit() ? prefetchedBizList.size() : config.getSearchResultsLimit())) {
             Map<String, String> uriVarz = yelpApi.getUriVars();
             uriVarz.put("bizId", (String)business.get("id"));
 
             ResponseEntity<JsonNode> reviewsResponseEntity = yelpApi.apiCall(CallType.REVIEWS, yelpApi.getReviewsSearchUriBuilder(), uriVarz, yelpApi.getHttpMethod()).block();
-            if (isErrorStatusCode(reviewsResponseEntity)) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
-                bodyToErrorMsgJsonString(reviewsResponseEntity.getBody()));
-            }
 
             List<YelpReview> yelpReviews = new ArrayList<YelpReview>();
             Iterator<JsonNode> reviewsArray = reviewsResponseEntity.getBody().get("reviews").iterator();
@@ -99,10 +90,9 @@ public class Controller {
             yelpBizSearch.setBizReviews(yelpReviews);
             dataList.add(yelpBizSearch);
         }
-
-        YelpBizSearchList yelpBizSearchList = new YelpBizSearchList(count, searchResultsLimit, dataList);
-
-        return new ResponseEntity<String>(JSON.toJson(yelpBizSearchList), HttpStatus.OK);
+        
+        YelpBizSearchList yelpBizSearchList = new YelpBizSearchList(count, config.getSearchResultsLimit(), dataList);
+        return new ResponseEntity<Object>(JSON.toJson(yelpBizSearchList), HttpStatus.OK);
     }
 
     /**
@@ -113,36 +103,31 @@ public class Controller {
      * @throws JsonProcessingException
      * @throws IllegalArgumentException
      */
-    @GetMapping("/reviews/{bizId}")
-    ResponseEntity<String> reviewsByYelpBusinessId(@PathVariable String bizId) throws JsonMappingException, JsonProcessingException, IllegalArgumentException {
+    @GetMapping(value = "/reviews/{bizId}", produces = "application/json")
+    @Validated
+    ResponseEntity<Object> reviewsByYelpBusinessId(@PathVariable String bizId) throws JsonMappingException, JsonProcessingException, IllegalArgumentException {
         HashMap<String,String> pathVars = new HashMap<String,String>();
         pathVars.put("bizId", bizId);
         
         YelpApi yelpApi = new YelpApi(
-            (Map<String,String> uriVariables) -> "/" + uriVariables.get("bizId") + "/reviews",
             (Map<String,String> uriVariables) -> "/" + uriVariables.get("bizId"),
+            (Map<String,String> uriVariables) -> "/" + uriVariables.get("bizId") + "/reviews",
             HttpMethod.GET, pathVars
         );
 
         ResponseEntity<JsonNode> bizResponseEntity = yelpApi.apiCall(YelpApi.CallType.BUSINESS, yelpApi.getBizSearchUriBuilder(), yelpApi.getUriVars(), yelpApi.getHttpMethod()).block();
-        ResponseEntity<JsonNode> reviewsResponseEntity = yelpApi.apiCall(YelpApi.CallType.REVIEWS, yelpApi.getReviewsSearchUriBuilder(), yelpApi.getUriVars(), yelpApi.getHttpMethod()).block();
-        
-        if (isErrorStatusCode(bizResponseEntity)) { 
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, bodyToErrorMsgJsonString(bizResponseEntity.getBody()));
-        } else if (isErrorStatusCode(reviewsResponseEntity)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, bodyToErrorMsgJsonString(reviewsResponseEntity.getBody()));
-        }
-
-        YelpBizSearch yelpBizSearch = JSON.jsonToObject(bizResponseEntity.getBody(), YelpBizSearch.class);
-
-        List<YelpReview> yelpReviewList = new ArrayList<>();
-        Iterator<JsonNode> reviewListIter = reviewsResponseEntity.getBody().get("reviews").iterator();
-            while (reviewListIter.hasNext()) {
-                yelpReviewList.add(JSON.jsonToObject(reviewListIter.next(), YelpReview.class));
-            }
-        yelpBizSearch.setBizReviews(yelpReviewList);
-
-        return new ResponseEntity<String>(JSON.toJson(yelpBizSearch), HttpStatus.OK);
+          ResponseEntity<JsonNode> reviewsResponseEntity = yelpApi.apiCall(YelpApi.CallType.REVIEWS, yelpApi.getReviewsSearchUriBuilder(), yelpApi.getUriVars(), yelpApi.getHttpMethod()).block();
+  
+          YelpBizSearch yelpBizSearch = JSON.jsonToObject(bizResponseEntity.getBody(), YelpBizSearch.class);
+  
+          List<YelpReview> yelpReviewList = new ArrayList<>();
+          Iterator<JsonNode> reviewListIter = reviewsResponseEntity.getBody().get("reviews").iterator();
+              while (reviewListIter.hasNext()) {
+                  yelpReviewList.add(JSON.jsonToObject(reviewListIter.next(), YelpReview.class));
+              }
+          yelpBizSearch.setBizReviews(yelpReviewList);
+  
+          return new ResponseEntity<Object>(JSON.toJson(yelpBizSearch), HttpStatus.OK);
     }
 
     @RequestMapping("*")
