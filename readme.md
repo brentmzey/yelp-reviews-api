@@ -174,7 +174,7 @@ There are two main endpoints:
 
 ### API Errors
 
-- This API Wrapper will return an HTTP 400 response status with an error array explaining as such
+- This API Wrapper will return a 400 response status with an error array explaining the issue
 
 - **Example**
   - /reviews?term=burger&location=*blank*
@@ -186,7 +186,44 @@ There are two main endpoints:
   - *JSON Response*
 
 ```json
-null
+{
+  "statusCode": 400,
+  "status": "BAD_REQUEST",
+  "message": "VALIDATION_ERROR",
+  "errors": [
+    {
+      "errorType": "WRAPPER_API_ERROR",
+      "field": "location",
+      "rejectedValue": "",
+      "message": "location is invalid or missing from the request."
+    }
+  ]
+}
+```
+
+-**Example**
+  - /reviews?ter
+
+  - *HTTP Status Code Response*
+
+    - 400 - BAD_REQUEST
+
+  - *JSON Response*
+
+```json
+{
+  "statusCode": 400,
+  "status": "BAD_REQUEST",
+  "message": "VALIDATION_ERROR",
+  "errors": [
+    {
+      "errorType": "WRAPPER_API_ERROR",
+      "field": "term",
+      "rejectedValue": null,
+      "message": "term is invalid or missing from the request."
+    }
+  ]
+}
 ```
 
 - This API Wrapper will reject any invalid request syntax and return an HTTP 400 response status
