@@ -176,7 +176,7 @@ There are two main endpoints:
 
 - This API Wrapper will return a 400 response status with an error array explaining the issue
 
-- **Example**
+  - **Example**
   - /reviews?term=burger&location=*blank*
 
   - *HTTP Status Code Response*
@@ -231,7 +231,7 @@ There are two main endpoints:
 
 - This API will allow any argument to besides null or empty string to the location parameter but will allow the Yelp API to return errors
 
-- **Examples**
+  - **Examples**
   1. /reviews?term=burger&location=asdfasdf
 
   2. /reviews/{*Non-existant Yelp Business ID*}
