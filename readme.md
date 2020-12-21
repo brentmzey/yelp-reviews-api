@@ -203,15 +203,15 @@ There are two main endpoints:
 
 - This API Wrapper will reject any invalid request syntax and return an HTTP 400 response status
 
-  -**Example**
+-**Example**
 
-    - /reviews?ter
+  - /reviews?ter
 
-    - *HTTP Status Code Response*
+  - *HTTP Status Code Response*
 
-      - 400 - BAD_REQUEST
+    - 400 - BAD_REQUEST
 
-    - *JSON Response*
+  - *JSON Response*
 
 ```json
 {
@@ -231,10 +231,10 @@ There are two main endpoints:
 
 - This API will allow any argument to besides null or empty string to the location parameter but will allow the Yelp API to return errors
 
-  - **Examples**
-    1. /reviews?term=burger&location=asdfasdf
+- **Examples**
+  1. /reviews?term=burger&location=asdfasdf
 
-    2. /reviews/{*Non-existant Yelp Business ID*}
+  2. /reviews/{*Non-existant Yelp Business ID*}
 
   - *HTTP Status Code Response*
 
@@ -257,7 +257,7 @@ There are two main endpoints:
 }
 ```
 
-  - *JSON Response for Example 2 (bad business search)*
+- *JSON Response for Example 2 (bad business search)*
 
 ```json
 {
