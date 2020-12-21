@@ -13,6 +13,10 @@ public abstract class ApiErrorListElement {
 
     public ApiErrorListElement() {}
 
+    public ApiErrorListElement(ErrorType errorType) {
+        this.errorType = errorType;
+    }
+    
     public ApiErrorListElement(ErrorType errorType, String message) {
         this.errorType = errorType;
         this.message = message;

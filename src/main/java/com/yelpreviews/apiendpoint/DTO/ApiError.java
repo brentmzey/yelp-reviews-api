@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.yelpreviews.apiendpoint.utils.JSON;
 import org.springframework.http.HttpStatus;
 
@@ -22,6 +23,7 @@ public class ApiError {
     private String debugMessage;
 
     public String toJson() throws JsonProcessingException { return JSON.toJson(this); }
+    public JsonNode toJsonNode() throws JsonProcessingException { return JSON.objectToJsonNode(this); }
 
     public ApiError() {}
 

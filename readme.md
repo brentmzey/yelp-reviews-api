@@ -201,14 +201,17 @@ There are two main endpoints:
 }
 ```
 
--**Example**
-  - /reviews?ter
+- This API Wrapper will reject any invalid request syntax and return an HTTP 400 response status
 
-  - *HTTP Status Code Response*
+  -**Example**
 
-    - 400 - BAD_REQUEST
+    - /reviews?ter
 
-  - *JSON Response*
+    - *HTTP Status Code Response*
+
+      - 400 - BAD_REQUEST
+
+    - *JSON Response*
 
 ```json
 {
@@ -226,25 +229,46 @@ There are two main endpoints:
 }
 ```
 
-- This API Wrapper will reject any invalid request syntax and return an HTTP 400 response status
+- This API will allow any argument to besides null or empty string to the location parameter but will allow the Yelp API to return errors
 
-- **Examples**
-  - /reviews?t=burger&locat
+  - **Examples**
+    1. /reviews?term=burger&location=asdfasdf
 
-  - /reviews/{*Non-existant Yelp Business ID*}
+    2. /reviews/{*Non-existant Yelp Business ID*}
 
   - *HTTP Status Code Response*
 
-    - 400 - BAD_REQUEST
+    - 404 - Not Found
   
-  - *JSON Response*
+  - *JSON Response for Example 1 (bad search by term & location)*
 
 ```json
 {
-  "error": [
+  "statusCode": 404,
+  "status": "NOT_FOUND",
+  "message": "Could not execute search, try specifying a more exact location.",
+  "errors": [
     {
-      "message": "Bad request response from the Yelp API.",
-      "statusCode": "400"
+      "errorType": "YELP_API_ERROR",
+      "message": "Could not execute search, try specifying a more exact location.",
+      "errorCode": "LOCATION_NOT_FOUND"
+    }
+  ]
+}
+```
+
+  - *JSON Response for Example 2 (bad business search)*
+
+```json
+{
+  "statusCode": 404,
+  "status": "NOT_FOUND",
+  "message": "The requested business could not be found.",
+  "errors": [
+    {
+      "errorType": "YELP_API_ERROR",
+      "message": "The requested business could not be found.",
+      "errorCode": "BUSINESS_NOT_FOUND"
     }
   ]
 }

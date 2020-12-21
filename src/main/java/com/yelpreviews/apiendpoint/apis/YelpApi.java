@@ -59,11 +59,16 @@ public class YelpApi {
                         if (res.statusCode().equals(HttpStatus.OK)) {
                             return res.toEntity(JsonNode.class);
                         } else if (res.statusCode().is4xxClientError()) {
-                            try {
-                              throw new YelpApiResponseException(res.toEntity(JsonNode.class));
-                            } catch (JsonProcessingException e) {
-                                throw new ServerErrorException("INTERNAL_SERVER_ERROR", e);
-                            }
+                            return res.bodyToMono(JsonNode.class).flatMap(resBody -> {
+                                JsonNode errorMapNode = resBody.get("error");
+                                YelpApiError yelpApiError;
+                                try {
+                                  yelpApiError = JSON.jsonToObject(errorMapNode, YelpApiError.class);
+                                } catch (JsonProcessingException | IllegalArgumentException e) {
+                                  throw new ServerErrorException("INTERNAL_SERVER_ERROR", e);
+                                }
+                                throw new YelpApiResponseException(HttpStatus.NOT_FOUND, yelpApiError);
+                            });
                         } else {
                             try {
                               throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, JSON.toJson(Map.of("error", List.of(Map.of("statusCode", "500", "message", "Internal server error on the Yelp API.")))));

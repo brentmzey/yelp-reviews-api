@@ -77,7 +77,7 @@ public class RestResponseExceptionHandler extends ResponseEntityExceptionHandler
 
     @ExceptionHandler(value = {YelpApiResponseException.class})
     protected ResponseEntity<Object> handleYelpApiResponseError(YelpApiResponseException ex, WebRequest request) throws JsonProcessingException {
-      return handleExceptionInternal(ex, buildApiErrorJsonString(ex.getStatus(), ex.getReason(), ex.getYelpApiError()), ex.getYelpApiResponseEntity().getHeaders(), ex.getStatus(), request);
+      return handleExceptionInternal(ex, buildApiErrorJsonString(ex.getStatus(), ex.getYelpApiError().getMessage(), ex.getYelpApiError()), ex.getResponseHeaders(), ex.getStatus(), request);
     }
     
     @ExceptionHandler(value = {PathNotFoundException.class})

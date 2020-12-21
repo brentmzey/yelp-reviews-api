@@ -8,12 +8,15 @@ import java.util.List;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.yelpreviews.apiendpoint.DTO.YelpApiError;
 import com.yelpreviews.apiendpoint.DTO.YelpBizSearch;
 import com.yelpreviews.apiendpoint.DTO.YelpBizSearchList;
 import com.yelpreviews.apiendpoint.DTO.YelpReview;
 import com.yelpreviews.apiendpoint.apis.YelpApi;
 import com.yelpreviews.apiendpoint.apis.YelpApi.CallType;
 import com.yelpreviews.apiendpoint.exceptions.InvalidRequestParametersException;
+import com.yelpreviews.apiendpoint.exceptions.PathNotFoundException;
+import com.yelpreviews.apiendpoint.exceptions.YelpApiResponseException;
 import com.yelpreviews.apiendpoint.utils.JSON;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
@@ -25,9 +28,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.server.ServerErrorException;
 
 @RestController
 @ComponentScan(basePackageClasses = com.yelpreviews.apiendpoint.controller.ControllerConfig.class)
@@ -116,24 +119,33 @@ public class Controller {
         );
 
         ResponseEntity<JsonNode> bizResponseEntity = yelpApi.apiCall(YelpApi.CallType.BUSINESS, yelpApi.getBizSearchUriBuilder(), yelpApi.getUriVars(), yelpApi.getHttpMethod()).block();
-          ResponseEntity<JsonNode> reviewsResponseEntity = yelpApi.apiCall(YelpApi.CallType.REVIEWS, yelpApi.getReviewsSearchUriBuilder(), yelpApi.getUriVars(), yelpApi.getHttpMethod()).block();
+        ResponseEntity<JsonNode> reviewsResponseEntity = yelpApi.apiCall(YelpApi.CallType.REVIEWS, yelpApi.getReviewsSearchUriBuilder(), yelpApi.getUriVars(), yelpApi.getHttpMethod()).block();
+
+        if (bizResponseEntity.getStatusCode().is4xxClientError() || reviewsResponseEntity.getStatusCode().is4xxClientError()) {
+            JsonNode bodyNode = bizResponseEntity.getBody();
+            System.out.println(bodyNode);
+            try {
+                throw new YelpApiResponseException(bizResponseEntity.getStatusCode(), JSON.jsonToObject(bodyNode, YelpApiError.class));
+            } catch (JsonProcessingException | IllegalArgumentException e) {
+                throw new ServerErrorException("INTERNAL_SERVER_ERROR", e);
+            }
+        }
   
-          YelpBizSearch yelpBizSearch = JSON.jsonToObject(bizResponseEntity.getBody(), YelpBizSearch.class);
-  
-          List<YelpReview> yelpReviewList = new ArrayList<>();
-          Iterator<JsonNode> reviewListIter = reviewsResponseEntity.getBody().get("reviews").iterator();
-              while (reviewListIter.hasNext()) {
-                  yelpReviewList.add(JSON.jsonToObject(reviewListIter.next(), YelpReview.class));
-              }
-          yelpBizSearch.setBizReviews(yelpReviewList);
-  
-          return new ResponseEntity<Object>(JSON.toJson(yelpBizSearch), HttpStatus.OK);
+        YelpBizSearch yelpBizSearch = JSON.jsonToObject(bizResponseEntity.getBody(), YelpBizSearch.class);
+
+        List<YelpReview> yelpReviewList = new ArrayList<>();
+        Iterator<JsonNode> reviewListIter = reviewsResponseEntity.getBody().get("reviews").iterator();
+            while (reviewListIter.hasNext()) {
+                yelpReviewList.add(JSON.jsonToObject(reviewListIter.next(), YelpReview.class));
+            }
+        yelpBizSearch.setBizReviews(yelpReviewList);
+
+        return new ResponseEntity<Object>(JSON.toJson(yelpBizSearch), HttpStatus.OK);
     }
 
     @RequestMapping("*")
-    @ResponseBody
     public String getAnythingelse(){
-        return "Request not found";
+        throw new PathNotFoundException(HttpStatus.NOT_FOUND, "The requested path does not exist.");
     }
 
 }
