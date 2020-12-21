@@ -203,13 +203,13 @@ There are two main endpoints:
 
 - This API Wrapper will reject any invalid request syntax and return an HTTP 400 response status
 
--**Example**
+  -**Example**
 
-  - /reviews?ter
+    - /reviews?ter
 
-  - *HTTP Status Code Response*
+    - *HTTP Status Code Response*
 
-    - 400 - BAD_REQUEST
+      - 400 - BAD_REQUEST
 
   - *JSON Response*
 
